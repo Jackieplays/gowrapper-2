@@ -47,6 +47,22 @@
 	}
 
 	-----------------------------------------------------Done------
+func (s *sig) Close() error {
+	if s.sig == nil {
+		return errAlreadyClosed
+	}
+
+	res := C.FreeSig(k.ctx, s.sig)
+	if res != C.ERR_OK {
+		return libError(res, "failed to free signature")
+	}
+
+	s.sig = nil
+	return nil
+}
+
+
+
 
 
 func (s *sig) Verify(secretKey []byte,message []byte,signature []byte,publicKey []byte) ([]bool ,error) //Not sure
