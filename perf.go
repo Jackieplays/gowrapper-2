@@ -35,7 +35,7 @@ func main() {
    var elapsed_sec float64 = dur_time.Seconds()
  
     fmt.Printf("cgo show function elapsed  \nelapsed %f seconds\n",
-        elapsed_min, elapsed_sec, elapsed_nano)
+        elapsed_sec)
 
     now = time.Now()
     for i := 0; i < 100000000; i = i + 1 {
@@ -48,7 +48,7 @@ func main() {
     elapsed_sec = dur_time.Seconds()
    
     fmt.Printf("go show function elapsed  \nelapsed %f seconds \n",
-        elapsed_min, elapsed_sec, elapsed_nano)
+        elapsed_sec)
 
     var input string
     fmt.Scanln(&input)
