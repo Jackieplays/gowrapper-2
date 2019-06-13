@@ -4,11 +4,11 @@
 			return nil, nil, errAlreadyClosed
 		}
 	
-		pubKeyLen := C.int(s.kem.length_public_key)
+		pubKeyLen := C.int(s.sig.length_public_key)
 		pk := C.malloc(C.ulong(pubKeyLen))
 		defer C.free(unsafe.Pointer(pk))
 	
-		secretKeyLen := C.int(k.kem.length_secret_key)
+		secretKeyLen := C.int(k.sig.length_secret_key)
 		sk := C.malloc(C.ulong(secretKeyLen))
 		defer C.free(unsafe.Pointer(sk))
 	
@@ -27,19 +27,18 @@
 	
 		signatureLen := C.int(s.sig.length_signature)
 		sig1 := C.malloc(C.ulong(signatureLen))
-		//sig_len := len(signature) //Not sure...
  		defer C.free(unsafe.Pointer(sig1))
+		 
+		msg := C.CBytes(message) 
+		defer C.free(msg)
+	        mes_len := len(message)
+		
 
-		messagelen := C.int(s.sig.length_message)
-		mes := C.malloc(C.ulong(messagelen))
-		//mes_len := len(message)
-		defer C.free(unsafe.Pointer(mes))
-
-        sk :=C.CBytes(secretKey) //Doubt...
+                sk :=C.CBytes(secretKey) 
 		defer C.free(sk)
 	
 
-		res := C.sign(s.sig, (*C.uchar)(sig1), (*C.uint)(signaturelen), (*C.message)(mes),(*C.uint)(messagelen),(*C.uchar)(sk))
+		res := C.sign(s.sig, (*C.uchar)(sig1), (*C.uint)(signaturelen), (*C.message)(mes),(*C.uint)(mes_len),(*C.uchar)(sk))
 		if res != C.ERR_OK {
 			return nil,libError(res, "signing failed")
 		}
@@ -50,34 +49,33 @@
 	-----------------------------------------------------Done------
 
 
-func (s *sig) Verify(secretKey []byte,message []byte,signature []byte,publicKey []byte) (true or false []boolerr error) //Not sure
+func (s *sig) Verify(secretKey []byte,message []byte,signature []byte,publicKey []byte) ([]bool ,error) //Not sure
 {
 	if s.sig == nil {
 			return nil, nil, errAlreadyClosed
 		}
+	sk :=C.CBytes(secretKey) 
+		defer C.free(sk)
 	
-		signatureLen := C.int(s.sig.length_signature)
-		sig1 := C.malloc(C.ulong(signatureLen))
-		//sig_len := len(signature) //Not sure...
- 		defer C.free(unsafe.Pointer(sig1))
+	mes_len := C.uint(len(message))
+	msg :=C.CBytes(message) 
+		defer C.free(msg)
+	
+	
+	sign_len := C.uint(len(signature))
+	sgn :=C.CBytes(signature) 
+		defer C.free(sgn)
+	
 
-		messagelen := C.int(s.sig.length_message)
-		mes := C.malloc(C.ulong(messagelen))
-		//mes_len := len(message)
-		defer C.free(unsafe.Pointer(mes))
-
-		pk :=C.CBytes(publicKey) //Doubt...
+	pk :=C.CBytes(publicKey)
 		defer C.free(pk)
 	
 
-        sk :=C.CBytes(secretKey) //Doubt...
-		defer C.free(sk)
-	
 
-		res := C.sign(s.sig,(*C.message)(mes),(*C.uint)(messagelen),(*C.uchar)(sig1), (*C.uint)(signaturelen),(*C.uchar)(pk))
+		res := C.Verify(s.sig,(*C.message)(msg),(*C.uint)(mes_len),(*C.uchar)(sgn), (*C.uint)(sign_len),(*C.uchar)(pk))
 		if res != C.ERR_OK {
 			return nil,libError(res, "verification failed")
 		}
 	
-		return True,nil
+		return true,nil
 	}
