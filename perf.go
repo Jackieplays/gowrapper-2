@@ -55,8 +55,8 @@ func main() {
 }
 
 Output: 
-cgo show function elasped  
+cgo show function elapsed  
 elapsed 6.610593 seconds
-go show function elasped  
+go show function elapsed  
 elapsed 0.033000 seconds 
 
