@@ -34,7 +34,7 @@ func main() {
     var dur_time time.Duration = end_time.Sub(now)
    var elapsed_sec float64 = dur_time.Seconds()
  
-    fmt.Printf("cgo show function elasped  \nelapsed %f seconds\n",
+    fmt.Printf("cgo show function elapsed  \nelapsed %f seconds\n",
         elapsed_min, elapsed_sec, elapsed_nano)
 
     now = time.Now()
@@ -47,7 +47,7 @@ func main() {
     
     elapsed_sec = dur_time.Seconds()
    
-    fmt.Printf("go show function elasped  \nelapsed %f seconds \n",
+    fmt.Printf("go show function elapsed  \nelapsed %f seconds \n",
         elapsed_min, elapsed_sec, elapsed_nano)
 
     var input string
