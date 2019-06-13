@@ -1,9 +1,14 @@
-	
+	/*
 
 
 
-
-
+ libResult Verify(const OQS_SIG *sig, const uint8_t *message, size_t message_len, const uint8_t *signature, size_t signature_len, const uint8_t *public_key) {
+	OQS_STATUS status =sig->verify(message, message_len, signature, signature_len, public_key) != OQS_SUCCESS) {
+	if (status != OQS_SUCCESS) {
+		return ERR_OPERATION_FAILED;
+	}
+	return ERR_OK;
+}
 */
 /////////////////////////////////////////////////////////////////////////
 import "C"
