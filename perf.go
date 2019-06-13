@@ -53,3 +53,10 @@ func main() {
     var input string
     fmt.Scanln(&input)
 }
+
+Output: 
+cgo show function elasped  
+elapsed 6.610593 seconds
+go show function elasped  
+elapsed 0.033000 seconds 
+
