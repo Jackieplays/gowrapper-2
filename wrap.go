@@ -1,4 +1,101 @@
-	/*
+package goliboqs
+
+/*
+#cgo CFLAGS: -Iinclude
+#cgo LDFLAGS: -ldl
+typedef enum {
+	ERR_OK,
+	ERR_CANNOT_LOAD_LIB,
+	ERR_CONTEXT_CLOSED,
+	ERR_MEM,
+	ERR_NO_FUNCTION,
+	ERR_OPERATION_FAILED,
+} libResult;
+
+
+libResult New(const char *path, ctx **c) {
+	*c = malloc(sizeof(ctx));
+	if (!(*c)) {
+		return ERR_MEM;
+	}
+	(*c)->handle = dlopen(path, RTLD_NOW);
+	if (NULL == (*c)->handle) {
+		free(*c);
+		return ERR_CANNOT_LOAD_LIB;
+	}
+	return ERR_OK;
+}
+
+
+libResult New(const char *path, ctx **c) {
+	*c = malloc(sizeof(ctx));
+	if (!(*c)) {
+		return ERR_MEM;
+	}
+	(*c)->handle = dlopen(path, RTLD_NOW);
+	if (NULL == (*c)->handle) {
+		free(*c);
+		return ERR_CANNOT_LOAD_LIB;
+	}
+	return ERR_OK;
+}
+libResult GetSign(const ctx *ctx, const char *name, OQS_SIG **sig) {
+	if (!ctx->handle) {
+		return ERR_CONTEXT_CLOSED;
+	}
+	// func matches signature of OQS_KEM_new
+	OQS_SIG *(*func)(const char *);
+	*(void **)(&func) = dlsym(ctx->handle, "OQS_SIG_new");
+	if (NULL == func) {
+		return ERR_NO_FUNCTION;
+	}
+	*sig = (*func)(name);
+	return ERR_OK;
+}
+
+
+
+
+libResult FreeSig(ctx *ctx, OQS_SIG *sig) {
+	if (!ctx->handle) {
+		return ERR_CONTEXT_CLOSED;
+	}
+	// func matches signature of OQS_KEM_free
+	void (*func)(OQS_SIG*);
+	*(void **)(&func) = dlsym(ctx->handle, "OQS_SIG_free");
+	if (NULL == func) {
+		return ERR_NO_FUNCTION;
+	}
+	(*func)(sig);
+	return ERR_OK;
+}
+
+
+libResult Close(ctx *ctx) {
+	if (!ctx->handle) {
+		return ERR_CONTEXT_CLOSED;
+	}
+	dlclose(ctx->handle);
+	ctx->handle = NULL;
+	return ERR_OK;
+}
+
+
+libResult KeyPair(const OQS_KEM *kem, uint8_t *public_key, uint8_t *secret_key) {
+	OQS_STATUS status = sig->keypair(public_key, secret_key);
+	if (status != OQS_SUCCESS) {
+		return ERR_OPERATION_FAILED;
+	}
+	return ERR_OK;
+}
+
+libResult Sign(const OQS_SIG *sig, uint8_t *signature, size_t *signature_len, const uint8_t *message, size_t message_len, const uint8_t *secret_key) {
+OQS_STATUS status =sig->sign(message, message_len, signature, signature_len, public_key) != OQS_SUCCESS) {
+	if (status != OQS_SUCCESS) {
+		return ERR_OPERATION_FAILED;
+	}
+	return ERR_OK;
+}
 
 
 
@@ -101,7 +198,7 @@ type sign struct {
 		defer C.free(sk)
 	
 
-		res := C.sign(s.sig, (*C.uchar)(sig1), (*C.uint)(signaturelen), (*C.message)(mes),(*C.uint)(mes_len),(*C.uchar)(sk))
+		res := C.Sign(s.sig, (*C.uchar)(sig1), (*C.uint)(signaturelen), (*C.message)(mes),(*C.uint)(mes_len),(*C.uchar)(sk))
 		if res != C.ERR_OK {
 			return nil,libError(res, "signing failed")
 		}
@@ -217,7 +314,7 @@ func LoadLib(path string) (*Lib, error) {
 	return &Lib{ctx: ctx}, nil
 }
 -----------------------------------------------------------Done------------------------------
-/ GetKem returns a Kem for the specified algorithm. Constants are provided for known algorithms,
+//GetKem returns a Kem for the specified algorithm. Constants are provided for known algorithms,
 // but any string can be provided and will be passed through to liboqs. As a reminder, some algorithms
 // need to be explicitly enabled when building liboqs.
 func (l *Lib) GetSign(signType signType) (Sign, error) {
