@@ -158,8 +158,8 @@ type sign struct {
 }
 
 
-....................................................................
-	func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) {
+..........................................................................................................................
+	func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure when to use []byte datatype ?
 		if s.sig == nil {
 			return nil, nil, errAlreadyClosed
 		}
@@ -179,7 +179,7 @@ type sign struct {
 	
 		return C.GoBytes(pk, pubKeyLen), C.GoBytes(sk, secretKeyLen), nil
 	}
---------------------------------Done----------------------------------------------------
+--------------------------------Done-------------------------------------------------------------------------------------
 	func (s *sig) Sign(secretKey []byte,message []byte) (signature []byte, err error) {
 		if s.sig == nil {
 			return nil, nil, errAlreadyClosed
@@ -189,42 +189,41 @@ type sign struct {
 		sig1 := C.malloc(C.ulong(signatureLen))
  		defer C.free(unsafe.Pointer(sig1))
 		 
+		mes_len := C.int(len(message))   //Should it be uint or int?, //Is len() fine?
 		msg := C.CBytes(message) 
 		defer C.free(msg)
-	        mes_len := len(message)
+	      
 		
 
                 sk :=C.CBytes(secretKey) 
 		defer C.free(sk)
 	
 
-		res := C.Sign(s.sig, (*C.uchar)(sig1), (*C.uint)(signaturelen), (*C.message)(mes),(*C.uint)(mes_len),(*C.uchar)(sk))
+		res := C.Sign(s.sig, (*C.uchar)(sig1), (*C.int)(signatureLen), (*C.uchar)(msg),(*C.int)(mes_len),(*C.uchar)(sk))
 		if res != C.ERR_OK {
 			return nil,libError(res, "signing failed")
 		}
 	
-		return C.GoBytes(sig, signatureLen),  nil
+		return C.GoBytes(sig1, signatureLen),  nil
 	}
 
-	-----------------------------------------------------Done------
+	-----------------------------------------------------Done-----------------------------------------------------
 
 
 
 
-func (s *sig) Verify(secretKey []byte,message []byte,signature []byte,publicKey []byte) ([]bool ,error) //Not sure
+func (s *sig) Verify(message []byte,signature []byte,publicKey []byte) ([]bool ,err error) //Not sure
 {
 	if s.sig == nil {
 			return nil, nil, errAlreadyClosed
 		}
-	sk :=C.CBytes(secretKey) 
-		defer C.free(sk)
 	
-	mes_len := C.uint(len(message))
+	mes_len := C.int(len(message))
 	msg :=C.CBytes(message) 
 		defer C.free(msg)
 	
 	
-	sign_len := C.uint(len(signature))
+	sign_len := C.int(len(signature))
 	sgn :=C.CBytes(signature) 
 		defer C.free(sgn)
 	
@@ -234,14 +233,14 @@ func (s *sig) Verify(secretKey []byte,message []byte,signature []byte,publicKey 
 	
 
 
-		res := C.Verify(s.sig,(*C.message)(msg),(*C.uint)(mes_len),(*C.uchar)(sgn), (*C.uint)(sign_len),(*C.uchar)(pk))
+		res := C.Verify(s.sig,(*C.uchar)(msg),(*C.int)(mes_len),(*C.uchar)(sgn), (*C.int)(sign_len),(*C.uchar)(pk))
 		if res != C.ERR_OK {
 			return nil,libError(res, "verification failed")
 		}
 	
 		return true,nil
 	}
--------------------------------------------------------------Done------------------------------------------------------
+-------------------------------------------------------------Done----------------------------------------------------------
 
 func (s *sig) Close() error {
 	if s.sig == nil {
@@ -256,7 +255,7 @@ func (s *sig) Close() error {
 	s.sig = nil
 	return nil
 }
------------------------------------------------------Done------------------------
+-----------------------------------------------------Done----------------------------------------------------------------
 func libError(result C.libResult, msg string, a ...interface{}) error {
 	
 	if result == C.ERR_OPERATION_FAILED {
@@ -266,8 +265,8 @@ func libError(result C.libResult, msg string, a ...interface{}) error {
 	str := C.GoString(C.errorString(result))
 	return errors.Errorf("%s: %s", fmt.Sprintf(msg, a...), str)
 }
------------------------------------------------------------Done----------------------------------------
-type Kem interface {
+-----------------------------------------------------------Done---------------------------------------------------------
+type Sig interface {
 	// KeyPair generates a new key pair.
 	KeyPair() (publicKey, secretKey []byte, err error)
 
@@ -276,7 +275,7 @@ type Kem interface {
 	Sign(secretKey []byte,message []byte) (signature []byte, err error)
 
 	
-	Verify(secretKey []byte,message []byte,signature []byte,publicKey []byte) ([]bool ,error)
+	Verify(message []byte,signature []byte,publicKey []byte) ([]bool ,err error)
 
 	
 	Close() error
@@ -314,9 +313,7 @@ func LoadLib(path string) (*Lib, error) {
 	return &Lib{ctx: ctx}, nil
 }
 -----------------------------------------------------------Done------------------------------
-//GetKem returns a Kem for the specified algorithm. Constants are provided for known algorithms,
-// but any string can be provided and will be passed through to liboqs. As a reminder, some algorithms
-// need to be explicitly enabled when building liboqs.
+
 func (l *Lib) GetSign(signType signType) (Sign, error) {
 	cStr := C.CString(string(signType))
 	defer C.free(unsafe.Pointer(cStr))
