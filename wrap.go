@@ -267,10 +267,9 @@ func libError(result C.libResult, msg string, a ...interface{}) error {
 }
 -----------------------------------------------------------Done---------------------------------------------------------
 type Sig interface {
-	// KeyPair generates a new key pair.
+	
 	KeyPair() (publicKey, secretKey []byte, err error)
 
-	// Encaps generates a new shared secret and encrypts it under the public key.
 	
 	Sign(secretKey []byte,message []byte) (signature []byte, err error)
 
@@ -314,26 +313,26 @@ func LoadLib(path string) (*Lib, error) {
 }
 -----------------------------------------------------------Done------------------------------
 
-func (l *Lib) GetSign(signType signType) (Sign, error) {
+func (l *Lib) GetSign(sigType sigType) (Sig, error) {
 	cStr := C.CString(string(signType))
 	defer C.free(unsafe.Pointer(cStr))
 
-	var kemPtr *C.OQS_SIG
+	var sigPtr *C.OQS_SIG
 
-	res := C.GetSign(l.ctx, cStr, &signPtr)
+	res := C.GetSign(l.ctx, cStr, &sigPtr)
 	if res != C.ERR_OK {
 		return nil, libError(res, "failed to get Signature")
 	}
 
-	sign := &sign{
-		sign: signPtr,
+	sig := &sig{
+		sig: sigPtr,
 		ctx: l.ctx,
 	}
-	if sign.sign == nil {
+	if sig.sig == nil {
 		return nil, errAlgDisabledOrUnknown
 	}
 
-	return sign, nil
+	return sig, nil
 }
 ----------------------------------------------------------------------Done--------------------------------------------
 
