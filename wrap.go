@@ -305,9 +305,6 @@ func (l *Lib) Close() error {
 }
 --------------------------------------------------------Done-----------------------------------------------------------------
 
-// LoadLib loads the liboqs library. The path parameter is given directly to dlopen, see the dlopen man page
-// for details of how path is interpreted. (Paths with a slash are treated as absolute or relative paths). Be
-// sure to Close after use to free resources.
 func LoadLib(path string) (*Lib, error) {
 	p := C.CString(path)
 	defer C.free(unsafe.Pointer(p))
@@ -323,7 +320,7 @@ func LoadLib(path string) (*Lib, error) {
 -----------------------------------------------------------Done-----------------------------------------------------------------
 
 func (l *Lib) GetSign(sigType sigType) (Sig, error) {
-	cStr := C.CString(string(signType))
+	cStr := C.CString(string(sigType))
 	defer C.free(unsafe.Pointer(cStr))
 
 	var sigPtr *C.OQS_SIG
