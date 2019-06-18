@@ -12,18 +12,32 @@ typedef enum {
 	ERR_OPERATION_FAILED,
 } libResult;
 
+#include <oqs/oqs.h>
+#include <dlfcn.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-libResult New(const char *path, ctx **c) {
-	*c = malloc(sizeof(ctx));
-	if (!(*c)) {
-		return ERR_MEM;
+typedef struct {
+  void *handle;
+} ctx;
+
+char *errorString(libResult r) {
+	switch (r) {
+	case ERR_CANNOT_LOAD_LIB:
+		return "cannot load library";
+	case ERR_CONTEXT_CLOSED:
+		return "library closed";
+	case ERR_MEM:
+		return "out of memory";
+	case ERR_NO_FUNCTION:
+		return "library missing required function";
+	case ERR_OPERATION_FAILED:
+		// We have no further info to share
+		return "operation failed";
+	default:
+		return "unknown error";
 	}
-	(*c)->handle = dlopen(path, RTLD_NOW);
-	if (NULL == (*c)->handle) {
-		free(*c);
-		return ERR_CANNOT_LOAD_LIB;
-	}
-	return ERR_OK;
 }
 
 
@@ -60,7 +74,6 @@ libResult FreeSig(ctx *ctx, OQS_SIG *sig) {
 	if (!ctx->handle) {
 		return ERR_CONTEXT_CLOSED;
 	}
-	// func matches signature of OQS_KEM_free
 	void (*func)(OQS_SIG*);
 	*(void **)(&func) = dlsym(ctx->handle, "OQS_SIG_free");
 	if (NULL == func) {
@@ -96,10 +109,7 @@ OQS_STATUS status =sig->sign(message, message_len, signature, signature_len, pub
 	}
 	return ERR_OK;
 }
-
-
-
- libResult Verify(const OQS_SIG *sig, const uint8_t *message, size_t message_len, const uint8_t *signature, size_t signature_len, const uint8_t *public_key) {
+libResult Verify(const OQS_SIG *sig, const uint8_t *message, size_t message_len, const uint8_t *signature, size_t signature_len, const uint8_t *public_key) {
 	OQS_STATUS status =sig->verify(message, message_len, signature, signature_len, public_key) != OQS_SUCCESS) {
 	if (status != OQS_SUCCESS) {
 		return ERR_OPERATION_FAILED;
@@ -144,21 +154,20 @@ const (
   SigPicnicL1FS    SigType="qTESLA_III_speed"
 
 )
----------------------------------------------------------------------------------
+---------------------------------------------------------Done-----------------------------------------------------------------
 var errAlreadyClosed = errors.New("already closed")
 var errAlgDisabledOrUnknown = errors.New("Signature algorithm is unknown or disabled")
 
-// operationFailed exposed to help test code (which cannot use cgo "C.<foo>" variables)
 var operationFailed C.libResult = C.ERR_OPERATION_FAILED
 
 
-type sign struct {
-	sign *C.OQS_SIG
+type sig struct {
+	sig *C.OQS_SIG
 	ctx *C.ctx
 }
 
 
-..........................................................................................................................
+.......................................................Done...................................................................
 	func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure when to use []byte datatype ?
 		if s.sig == nil {
 			return nil, nil, errAlreadyClosed
@@ -255,7 +264,7 @@ func (s *sig) Close() error {
 	s.sig = nil
 	return nil
 }
------------------------------------------------------Done----------------------------------------------------------------
+-----------------------------------------------------Done--------------------------------------------------------------------
 func libError(result C.libResult, msg string, a ...interface{}) error {
 	
 	if result == C.ERR_OPERATION_FAILED {
@@ -265,7 +274,7 @@ func libError(result C.libResult, msg string, a ...interface{}) error {
 	str := C.GoString(C.errorString(result))
 	return errors.Errorf("%s: %s", fmt.Sprintf(msg, a...), str)
 }
------------------------------------------------------------Done---------------------------------------------------------
+-----------------------------------------------------------Done-------------------------------------------------------------
 type Sig interface {
 	
 	KeyPair() (publicKey, secretKey []byte, err error)
@@ -280,12 +289,12 @@ type Sig interface {
 	Close() error
 }
 
----------------------------------------------------------------------Done---------------------------------------------
+---------------------------------------------------------------------Done---------------------------------------------------
 
 type Lib struct {
 	ctx *C.ctx
 }
------------------------------------------------------Done--------------------------------
+-----------------------------------------------------Done----------------------------------------------------------------
 func (l *Lib) Close() error {
 	res := C.Close(l.ctx)
 	if res != C.ERR_OK {
@@ -294,7 +303,7 @@ func (l *Lib) Close() error {
 
 	return nil
 }
---------------------------------------------------------Done----------------------------
+--------------------------------------------------------Done-----------------------------------------------------------------
 
 // LoadLib loads the liboqs library. The path parameter is given directly to dlopen, see the dlopen man page
 // for details of how path is interpreted. (Paths with a slash are treated as absolute or relative paths). Be
@@ -311,7 +320,7 @@ func LoadLib(path string) (*Lib, error) {
 
 	return &Lib{ctx: ctx}, nil
 }
------------------------------------------------------------Done------------------------------
+-----------------------------------------------------------Done-----------------------------------------------------------------
 
 func (l *Lib) GetSign(sigType sigType) (Sig, error) {
 	cStr := C.CString(string(signType))
@@ -334,7 +343,7 @@ func (l *Lib) GetSign(sigType sigType) (Sig, error) {
 
 	return sig, nil
 }
-----------------------------------------------------------------------Done--------------------------------------------
+----------------------------------------------------------------------Done------------------------------------------------------
 
 
 
