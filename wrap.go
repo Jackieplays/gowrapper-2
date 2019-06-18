@@ -1,4 +1,4 @@
-package goliboqs
+package sigoliboqs
 
 /*
 #cgo CFLAGS: -Iinclude
