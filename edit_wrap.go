@@ -192,7 +192,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 
 func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert bool, err error) {
 	if s.sig == nil {
-		return nil, errAlreadyClosed
+		return false, errAlreadyClosed
 	}
 
 	mes_len := C.int(len(message))
