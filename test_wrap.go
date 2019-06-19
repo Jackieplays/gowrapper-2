@@ -1,18 +1,7 @@
-    SigPicnicL1FS   
-     SigPicnicL1FS   
-    SigPicnicL1FS    
-   SigPicnicL1FS    
-  SigPicnicL1FS    
-   SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS
+  
 
 
-package goliboqs
+package sigoliboqs
 
 import (
 	"testing"
@@ -24,31 +13,20 @@ const libPath = "/usr/local/liboqs/lib/liboqs.so"
 
 func TestRoundTrip(t *testing.T) {
 
-	kems := []KemType{
-		KemBike1L1,
-		KemBike1L3,
-		KemBike1L5,
-		KemBike2L1,
-		KemBike2L3,
-		KemBike2L5,
-		KemBike3L1,
-		KemBike3L3,
-		KemBike3L5,
-		KemFrodo640AES,
-		KemFrodo640Shake,
-		KemFrodo976AES,
-		KemFrodo976Shake,
-		KemFrodo1344AES,
-		KemFrodo1344Shake,
-		KemNewHope512,
-		KemNewHope1024,
-		KemKyber512,
-		KemKyber768,
-		KemKyber1024,
-		KemSidhP503,
-		KemSidhP751,
-		KemSikeP503,
-		KemSikeP751,
+	sigs := []SigTy
+	SigPicnicL1FS   
+     SigPicnicL1FS   
+    SigPicnicL1FS    
+   SigPicnicL1FS    
+  SigPicnicL1FS    
+   SigPicnicL1FS    
+  SigPicnicL1FS    
+  SigPicnicL1FS    
+  SigPicnicL1FS    
+  SigPicnicL1FS    
+  SigPicnicL1FS    
+  SigPicnicL1FS
+		
 	}
 
 	k, err := LoadLib(libPath)
