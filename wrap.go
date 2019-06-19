@@ -131,27 +131,27 @@ type SigType string
 const (
 
      SigPicnicL1FS   SigType="picnic_L1_FS"
-     SigPicnicL1FS   SigType="picnic_L1_UR"
+     SigPicnicL1UR   SigType="picnic_L1_UR"
 
-    SigPicnicL1FS    SigType="picnic_L3_FS"
+    SigPicnicL3FS    SigType="picnic_L3_FS"
 
-  SigPicnicL1FS    SigType="picnic_L3_UR"
+  SigPicnicL3UR    SigType="picnic_L3_UR"
 
-  SigPicnicL1FS    SigType="picnic_L5_FS"
+  SigPicnicL5FS    SigType="picnic_L5_FS"
 
-   SigPicnicL1FS    SigType="picnic_L5_UR"
+   SigPicnicL5UR    SigType="picnic_L5_UR"
 
-  SigPicnicL1FS    SigType="picnic2_L1_FS"
+  SigPicnicL1FS   SigType="picnic2_L1_FS"
 
-  SigPicnicL1FS    SigType="picnic2_L3_FS"
+  SigPicnicL3FS    SigType="picnic2_L3_FS"
 
-  SigPicnicL1FS    SigType="picnic2_L5_FS"
+  SigPicnicL5FS    SigType="picnic2_L5_FS"
 
-  SigPicnicL1FS    SigType="qTESLA_I"
+  SigqTESLAI    SigType="qTESLA_I"
 
-  SigPicnicL1FS    SigType="qTESLA_III_size"
+  SigqTESLAIIIsize    SigType="qTESLA_III_size"
 
-  SigPicnicL1FS    SigType="qTESLA_III_speed"
+  SigqTESLAIIIspeed    SigType="qTESLA_III_speed"
 
 )
 ---------------------------------------------------------Done-----------------------------------------------------------------
