@@ -9,23 +9,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const libPath = "/usr/local/liboqs/lib/liboqs.so"
+const libPath = "/usr/local/lib/liboqs.so"
 
 func TestRoundTrip(t *testing.T) {
 
 	sigs := []SigTy
 	SigPicnicL1FS   
-     SigPicnicL1FS   
-    SigPicnicL1FS    
+  SigPicnicL1UR
+	SigPicnicL3FS   
+    SigPicnicL3UR   
+   SigPicnicL5FS   
+  SigPicnicL5UR   
    SigPicnicL1FS    
-  SigPicnicL1FS    
-   SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS    
-  SigPicnicL1FS
+  SigPicnicL3FS   
+  SigPicnicL5FS    
+  SigqTESLAI    
+  SigqTESLAIIIsize
+  SigqTESLAIIIspeed 
+  
 		
 	}
 
@@ -35,8 +36,7 @@ func TestRoundTrip(t *testing.T) {
 
 	for _, sigAlg := range sigs {
 		t.Run(string(sigAlg), func(t *testing.T) {
-			//t.Parallel() <-- cannot use this because https://github.com/stretchr/testify/issues/187
-
+			
 			testSIG, err := k.GetSig(sigAlg)
 			if err == errAlgDisabledOrUnknown {
 				t.Skipf("Skipping disabled/unknown algorithm %q", sigAlg)
@@ -47,13 +47,13 @@ func TestRoundTrip(t *testing.T) {
 			publicKey, secretKey, err := testSIG.KeyPair()
 			require.NoError(t, err)
 
-			sharedSecret, ciphertext, err := testSIG.Encaps(publicKey)
+			signature, err := testSIG.Sign(secretKey,message)
 			require.NoError(t, err)
 
-			recoveredSecret, err := testSIG.Decaps(ciphertext, secretKey)
+			hello, err := testSIG.Verify(message,signature,publicKey)  //hello is of type bool
 			require.NoError(t, err)
 
-			assert.Equal(t, sharedSecret, recoveredSecret)
+			assert.Equal(t, hello, true)
 		})
 	}
 }
@@ -82,7 +82,7 @@ func TestLibraryClosed(t *testing.T) {
 	const expectedMsg = "library closed"
 
 	t.Run("GetSIG", func(t *testing.T) {
-		_, err := k.GetSig(KemBike1L1)
+		_, err := k.GetSig(SigPicnicL1FS )
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), expectedMsg)
 	})
@@ -94,12 +94,12 @@ func TestLibraryClosed(t *testing.T) {
 	})
 }
 
-func TestKEMClosed(t *testing.T) {
+func TestSIGClosed(t *testing.T) {
 	k, err := LoadLib(libPath)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, k.Close()) }()
 
-	testKEM, err := k.GetSig(KemKyber512)
+	testSIG, err := k.GetSig(SigqTESLAI)
 	require.NoError(t, err)
 
 	require.NoError(t, testSIG.Close())
@@ -109,17 +109,17 @@ func TestKEMClosed(t *testing.T) {
 		assert.Equal(t, errAlreadyClosed, err)
 	})
 
-	t.Run("Encaps", func(t *testing.T) {
+	t.Run("Sign", func(t *testing.T) {
 		_, _, err := testSIG.Encaps(nil)
 		assert.Equal(t, errAlreadyClosed, err)
 	})
 
-	t.Run("Decaps", func(t *testing.T) {
-		_, err := testSIG.Decaps(nil, nil)
+	t.Run("Verify", func(t *testing.T) {
+		_, err := testSIG.Decaps(nil, nil,nil)
 		assert.Equal(t, errAlreadyClosed, err)
 	})
 
-	t.Run("Decaps", func(t *testing.T) {
+	t.Run("Verify", func(t *testing.T) {
 		err := testSIG.Close()
 		assert.Equal(t, errAlreadyClosed, err)
 	})
