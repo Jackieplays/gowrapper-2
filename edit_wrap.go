@@ -89,14 +89,14 @@ libResult KeyPair(const OQS_SIG *sig, uint8_t *public_key, uint8_t *secret_key) 
 	return ERR_OK;
 }
 libResult Sign(const OQS_SIG *sig, uint8_t *signature, size_t *signature_len, const uint8_t *message, size_t message_len, const uint8_t *secret_key) {
-    OQS_STATUS status = sig->sign(signature, signature_len, message, message_len, secret_key) != OQS_SUCCESS) {
+    OQS_STATUS status = sig->sign(signature, signature_len, message, message_len, secret_key);
 	if (status != OQS_SUCCESS) {
 		return ERR_OPERATION_FAILED;
 	}
 	return ERR_OK;
 }
 libResult Verify(const OQS_SIG *sig, const uint8_t *message, size_t message_len, const uint8_t *signature, size_t signature_len, const uint8_t *public_key) {
-	OQS_STATUS status =sig->verify(message, message_len, signature, signature_len, public_key) != OQS_SUCCESS) {
+	OQS_STATUS status =sig->verify(message, message_len, signature, signature_len, public_key);
 	if (status != OQS_SUCCESS) {
 		return ERR_OPERATION_FAILED;
 	}
@@ -170,7 +170,7 @@ func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure wh
 }
 func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err error) {
 	if s.sig == nil {
-		return nil, nil, errAlreadyClosed
+		return nil, errAlreadyClosed
 	}
 
 	signatureLen := C.int(s.sig.length_signature)
@@ -194,7 +194,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 
 func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert []bool, err error) {
 	if s.sig == nil {
-		return nil, nil, errAlreadyClosed
+		return nil, errAlreadyClosed
 	}
 
 	mes_len := C.int(len(message))
