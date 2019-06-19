@@ -190,7 +190,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 	return C.GoBytes(sig1, signatureLen), nil
 }
 
-func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert []bool, err error) {
+func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert bool, err error) {
 	if s.sig == nil {
 		return nil, errAlreadyClosed
 	}
@@ -208,7 +208,7 @@ func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert
 
 	res := C.Verify(s.sig, (*C.uchar)(msg), (*C.int)(mes_len), (*C.uchar)(sgn), (*C.int)(sign_len), (*C.uchar)(pk))
 	if res != C.ERR_OK {
-		return nil, libError(res, "verification failed")
+		return false, libError(res, "verification failed")
 	}
 
 	return true, nil
@@ -243,7 +243,7 @@ type Sig interface {
 
 	Sign(secretKey []byte, message []byte) (signature []byte, err error)
 
-	Verify(message []byte, signature []byte, publicKey []byte) (assert []bool, err error)
+	Verify(message []byte, signature []byte, publicKey []byte) (assert bool, err error)
 
 	Close() error
 }
