@@ -125,11 +125,9 @@ const (
 
 	SigPicnicL5UR SigType = "picnic_L5_UR"
 
-	SigPicnicL1FS SigType = "picnic2_L1_FS"
+	SigPicnic2L3FS SigType = "picnic2_L3_FS"
 
-	SigPicnicL3FS SigType = "picnic2_L3_FS"
-
-	SigPicnicL5FS SigType = "picnic2_L5_FS"
+	SigPicnic2L5FS SigType = "picnic2_L5_FS"
 
 	SigqTESLAI SigType = "qTESLA_I"
 
@@ -157,7 +155,7 @@ func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure wh
 	pk := C.malloc(C.ulong(pubKeyLen))
 	defer C.free(unsafe.Pointer(pk))
 
-	secretKeyLen := C.int(k.sig.length_secret_key)
+	secretKeyLen := C.int(s.sig.length_secret_key)
 	sk := C.malloc(C.ulong(secretKeyLen))
 	defer C.free(unsafe.Pointer(sk))
 
@@ -221,7 +219,7 @@ func (s *sig) Close() error {
 		return errAlreadyClosed
 	}
 
-	res := C.FreeSig(k.ctx, s.sig)
+	res := C.FreeSig(s.ctx, s.sig)
 	if res != C.ERR_OK {
 		return libError(res, "failed to free signature")
 	}
@@ -276,8 +274,8 @@ func LoadLib(path string) (*Lib, error) {
 	return &Lib{ctx: ctx}, nil
 }
 
-func (l *Lib) GetSign(sigType sigType) (Sig, error) {
-	cStr := C.CString(string(sigType))
+func (l *Lib) GetSign(SigType SigType) (Sig, error) {
+	cStr := C.CString(string(SigType))
 	defer C.free(unsafe.Pointer(cStr))
 
 	var sigPtr *C.OQS_SIG
