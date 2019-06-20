@@ -20,9 +20,9 @@ func TestRoundTrip(t *testing.T) {
     SigPicnicL3UR   
    SigPicnicL5FS   
   SigPicnicL5UR   
-   SigPicnicL1FS    
+     
   SigPicnicL3FS   
-  SigPicnicL5FS    
+   
   SigqTESLAI    
   SigqTESLAIIIsize
   SigqTESLAIIIspeed 
