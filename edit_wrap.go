@@ -1,5 +1,7 @@
 package sigoliboqs
 
+//NOTE: THE COMMENTS BELOW ARE CODE WHICH GETS COMPILED (THEY ARE CALLED PREAMBLE).IT'S A UNIQUE/WEIRD FEATURE IN CGO.
+
 /*
 #cgo CFLAGS: -Iinclude
 #cgo LDFLAGS: -ldl
@@ -181,7 +183,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 
 	sk := C.CBytes(secretKey)
 	defer C.free(sk)
-
+//EXPECTED POTENTIAL BUGS IN THE LINE BELOW... 
 	res := C.Sign(s.sig, (*C.uchar)(sig1), (*C.int)(signatureLen), (*C.uchar)(msg), (*C.int)(mes_len), (*C.uchar)(sk))
 	if res != C.ERR_OK {
 		return nil, libError(res, "signing failed")
