@@ -175,7 +175,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 
 	signlen := C.int(s.sig.length_signature)
 	signatureLen := C.malloc(C.ulong(1))
-	sig1 := C.malloc(C.ulong(signlen))
+	sig1 := C.malloc(C.ulong(s.sig.length_signature))
 	defer C.free(unsafe.Pointer(sig1))
 
 	mes_len := C.size_t(len(message)) //Should it be uint or int?, //Is len() fine?
