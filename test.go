@@ -2,6 +2,9 @@ package sigoliboqs
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const libPath = "/usr/local/liboqs/.libs/liboqs.so"
@@ -23,6 +26,7 @@ func TestRoundTrip(t *testing.T) {
 		SigqTESLAIIIspeed,
 	}
 
+	var message = []byte("Hello Canada")
 	k, err := LoadLib(libPath)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, k.Close()) }()
@@ -43,10 +47,10 @@ func TestRoundTrip(t *testing.T) {
 			signature, err := testSIG.Sign(secretKey, message)
 			require.NoError(t, err)
 
-			assert, err := testSIG.Verify(message, signature, publicKey) //assert is of type bool
+			result, err := testSIG.Verify(message, signature, publicKey) //assert is of type bool
 			require.NoError(t, err)
 
-			assert.Equal(t, assert, true)
+			assert.Equal(t, result, true)
 		})
 	}
 }
@@ -68,31 +72,31 @@ func TestReEntrantLibrary(t *testing.T) {
 }
 
 func TestLibraryClosed(t *testing.T) {
-	k, err := LoadLib(libPath)
+	s, err := LoadLib(libPath)
 	require.NoError(t, err)
-	require.NoError(t, k.Close())
+	require.NoError(t, s.Close())
 
 	const expectedMsg = "library closed"
 
 	t.Run("GetSIG", func(t *testing.T) {
-		_, err := k.GetSig(SigPicnicL1FS)
+		_, err := s.GetSign(SigPicnicL1FS)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), expectedMsg)
 	})
 
 	t.Run("Close", func(t *testing.T) {
-		err := k.Close()
+		err := s.Close()
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), expectedMsg)
 	})
 }
 
 func TestSIGClosed(t *testing.T) {
-	k, err := LoadLib(libPath)
+	s, err := LoadLib(libPath)
 	require.NoError(t, err)
-	defer func() { require.NoError(t, k.Close()) }()
+	defer func() { require.NoError(t, s.Close()) }()
 
-	testSIG, err := k.GetSig(SigqTESLAI)
+	testSIG, err := s.GetSign(SigqTESLAI)
 	require.NoError(t, err)
 
 	require.NoError(t, testSIG.Close())
@@ -103,7 +107,7 @@ func TestSIGClosed(t *testing.T) {
 	})
 
 	t.Run("Sign", func(t *testing.T) {
-		_, _, err := testSIG.Sign(nil)
+		_, err := testSIG.Sign(nil, nil)
 		assert.Equal(t, errAlreadyClosed, err)
 	})
 
@@ -119,11 +123,11 @@ func TestSIGClosed(t *testing.T) {
 }
 
 func TestInvalidSIGAlg(t *testing.T) {
-	k, err := LoadLib(libPath)
+	s, err := LoadLib(libPath)
 	require.NoError(t, err)
-	defer func() { require.NoError(t, k.Close()) }()
+	defer func() { require.NoError(t, s.Close()) }()
 
-	_, err = k.GetSig(SigType("this will never be valid"))
+	_, err = s.GetSign(SigType("this will never be valid"))
 	assert.Equal(t, errAlgDisabledOrUnknown, err)
 }
 
