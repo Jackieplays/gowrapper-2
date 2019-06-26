@@ -13,18 +13,18 @@ const libPath = "/usr/local/liboqs/.libs/liboqs.so"
 func TestRoundTrip(t *testing.T) {
 
 	sigs := []SigType{
-		SigPicnicL1FS,
-		SigPicnicL1UR,
-		SigPicnicL3FS,
-		SigPicnicL3UR,
-		SigPicnicL5FS,
-	        SigPicnicL5UR,
-		SigPicnic2L1FS,
-		SigPicnic2L3FS,
+		//SigPicnicL1FS,
+		//SigPicnicL1UR,
+		//SigPicnicL3FS,
+		//SigPicnicL3UR,
+		//SigPicnicL5FS,
+		//igPicnicL5UR,
+		//SigPicnic2L1FS,
+		//SigPicnic2L3FS,
 		SigPicnic2L5FS,
-		SigqTESLAI,
-		SigqTESLAIIIsize,
-		SigqTESLAIIIspeed,
+		//SigqTESLAI,
+		//SigqTESLAIIIsize,
+		//SigqTESLAIIIspeed,
 	}
 
 	var message = []byte("Hello")
