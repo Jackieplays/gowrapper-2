@@ -168,7 +168,7 @@ func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure wh
 	if res != C.ERR_OK {
 		return nil, nil, libError(res, "key pair generation failed")
 	}
-	fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+	//fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 	return C.GoBytes(pk, pubKeyLen), C.GoBytes(sk, secretKeyLen), nil
 }
 func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err error) {
@@ -184,7 +184,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 	mes_len := C.size_t(len(message)) //Should it be uint or int?, //Is len() fine?
 	msg := C.CBytes(message)
 	defer C.free(msg)
-	fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+	//fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 	sk := C.CBytes(secretKey)
 	defer C.free(sk)
 	//EXPECTED POTENTIAL BUGS IN THE LINE BELOW...Still struggling to resolve :(
@@ -201,21 +201,21 @@ func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert
 	if s.sig == nil {
 		return false, errAlreadyClosed
 	}
-	fmt.Println("A")
+	//fmt.Println("A")
 	mes_len := C.ulong(len(message))
 	msg := C.CBytes(message)
 	defer C.free(msg)
-	fmt.Println("B")
+	//fmt.Println("B")
 	sign_len := C.ulong(len(signature))
 	sgn := C.CBytes(signature)
 	defer C.free(sgn)
-	fmt.Println("C")
+	//fmt.Println("C")
 	pk := C.CBytes(publicKey)
 	defer C.free(pk)
-	fmt.Println("D")
+	//fmt.Println("D")
 	res := C.Verify(s.sig, (*C.uchar)(msg), mes_len, (*C.uchar)(sgn), sign_len, (*C.uchar)(pk))
 	if res != C.ERR_OK {
-		fmt.Println("E")
+		//fmt.Println("E")
 		return false, libError(res, "verification failed")
 	}
 
