@@ -164,7 +164,7 @@ const (
 type AlgType string
 
 const (
-	AlgNistKat AlgType = "NIST_KAT"
+	AlgNistKat AlgType = "NIST-KAT"
 )
 
 var errAlreadyClosed = errors.New("already closed")
