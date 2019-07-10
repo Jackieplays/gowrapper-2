@@ -52,17 +52,18 @@ libResult New(const char *path, ctx **c) {
 }
 
 
-libResult GetAlg(const ctx *ctx, const char *name, OQS_randombytes **alg) {
+libResult GetAlg(const ctx *ctx, const char *name) {
 	if (!ctx->handle) {
 		return ERR_CONTEXT_CLOSED;
 	}
 
-	OQS_randombytes *(*func)(const char *);
-	*(void **)(&func) = dlsym(ctx->handle, "OQS_randombytes_new");
+	OQS_STATUS *(*func)(const char *);
+
+	*(void **)(&func) = dlsym(ctx->handle, "OQS_randombytes_switch_algorithm");
 	if (NULL == func) {
 		return ERR_NO_FUNCTION;
 	}
-	*alg = (*func)(name);
+
 	return ERR_OK;
 }
 
@@ -175,7 +176,12 @@ type sig struct {
 	sig *C.OQS_SIG
 	ctx *C.ctx
 }
+type alg struct {
+	alg *C.OQS_STATUS
+	ctx *C.ctx
+}
 
+//hello
 //fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 
 func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure when to use []byte datatype ?
@@ -343,24 +349,23 @@ func (l *Lib) GetSign(SigType SigType) (Sig, error) {
 
 	return sig, nil
 }
-func (l *Lib) GetAlg(AlgType AlgType) (Alg, error) {
-	cStr := C.CString(string(algType))
+func (l *Lib) GetAlg(AlgType AlgType) (int, error) {
+	cStr := C.CString(string(AlgType))
 	defer C.free(unsafe.Pointer(cStr))
 
-	var algPtr *C.OQS_RAND
+	res := C.GetAlg(l.ctx, cStr)
 
-	res := C.GetAlg(l.ctx, cStr, &algPtr)
 	if res != C.ERR_OK {
-		return nil, libError(res, "failed to get Alg")
+		return -1, libError(res, "failed to get Alg")
 	}
 
-	alg := &alg{
-		alg: algPtr,
+	/*alg := &alg{
+		alg: res,
 		ctx: l.ctx,
 	}
 	if alg.alg == nil {
-		return nil, errAlgDisabledOrUnknown
+		return -1, errAlgDisabledOrUnknown
 	}
-
-	return alg, nil
+	*/
+	return 1, nil
 }
