@@ -4,7 +4,7 @@ package sigoliboqs
 
 /*
 #cgo CFLAGS: -Iinclude
-#cgo LDFLAGS: -ldl -loqs
+#cgo LDFLAGS: -ldl -loqs -lm
 typedef enum {
 	ERR_OK,
 	ERR_CANNOT_LOAD_LIB,
@@ -52,7 +52,7 @@ libResult New(const char *path, ctx **c) {
 }
 
 
-libResult GetAlg(const ctx *ctx, const char *name) {
+libResult SetRandomAlg(const ctx *ctx, const char *name) {
 	if (!ctx->handle) {
 		return ERR_CONTEXT_CLOSED;
 	}
@@ -349,11 +349,11 @@ func (l *Lib) GetSign(SigType SigType) (Sig, error) {
 
 	return sig, nil
 }
-func (l *Lib) GetAlg(AlgType AlgType) (int, error) {
+func (l *Lib) SetRandomAlg(AlgType AlgType) (int, error) {
 	cStr := C.CString(string(AlgType))
 	defer C.free(unsafe.Pointer(cStr))
 
-	res := C.GetAlg(l.ctx, cStr)
+	res := C.SetRandomAlg(l.ctx, cStr)
 
 	if res != C.ERR_OK {
 		return -1, libError(res, "failed to get Alg")
