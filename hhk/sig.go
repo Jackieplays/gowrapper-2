@@ -53,17 +53,10 @@ libResult New(const char *path, ctx **c) {
 
 
 libResult SetRandomAlg(const ctx *ctx, const char *name) {
-	if (!ctx->handle) {
-		return ERR_CONTEXT_CLOSED;
+	OQS_STATUS status = OQS_randombytes_switch_algorithm(name);
+	if (status != OQS_SUCCESS) {
+		return ERR_OPERATION_FAILED;
 	}
-
-	OQS_STATUS *(*func)(const char *);
-
-	*(void **)(&func) = dlsym(ctx->handle, "OQS_randombytes_switch_algorithm");
-	if (NULL == func) {
-		return ERR_NO_FUNCTION;
-	}
-
 	return ERR_OK;
 }
 
@@ -349,8 +342,8 @@ func (l *Lib) GetSign(SigType SigType) (Sig, error) {
 
 	return sig, nil
 }
-func (l *Lib) SetRandomAlg(AlgType AlgType) (int, error) {
-	cStr := C.CString(string(AlgType))
+func (l *Lib) SetRandomAlg(strAlg AlgType) (int, error) {
+	cStr := C.CString(string(strAlg))
 	defer C.free(unsafe.Pointer(cStr))
 
 	res := C.SetRandomAlg(l.ctx, cStr)
@@ -359,13 +352,5 @@ func (l *Lib) SetRandomAlg(AlgType AlgType) (int, error) {
 		return -1, libError(res, "failed to get Alg")
 	}
 
-	/*alg := &alg{
-		alg: res,
-		ctx: l.ctx,
-	}
-	if alg.alg == nil {
-		return -1, errAlgDisabledOrUnknown
-	}
-	*/
 	return 1, nil
 }

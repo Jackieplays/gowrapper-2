@@ -17,6 +17,7 @@ func TestRoundTrip(t *testing.T) {
 	sigs := []SigType{
 		SigqTESLAI,
 		SigqTESLAIIIspeed,
+		SigqTESLAIIIsize,		
 		//SigPicnicL1FS,
 		//SigPicnicL1UR,
 		//SigPicnicL3FS,
@@ -26,8 +27,6 @@ func TestRoundTrip(t *testing.T) {
 		//SigPicnic2L1FS,
 		//SigPicnic2L3FS,
 		//SigPicnic2L5FS,
-		//SigqTESLAI,
-		//SigqTESLAIIIsize,
 	}
 
 	//var message = []byte("Hello")
@@ -35,11 +34,11 @@ func TestRoundTrip(t *testing.T) {
 	s, err := LoadLib(libPath)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, s.Close()) }()
-	s.SetRandomAlg(AlgNistKat)
 			
 	for _, sigAlg := range sigs {
 		t.Run(string(sigAlg), func(t *testing.T) {
 
+			s.SetRandomAlg(AlgNistKat)
 			testSIG, err := s.GetSign(sigAlg)
 			if err == errAlgDisabledOrUnknown {
 				t.Skipf("Skipping disabled/unknown algorithm %q", sigAlg)
