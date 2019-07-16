@@ -59,6 +59,16 @@ libResult SetRandomAlg(const ctx *ctx, const char *name) {
 	}
 	return ERR_OK;
 }
+libResult GetRandomBytes(char *name,int nbytes) {
+	OQS_randombytes(name,nbytes);
+
+	return ERR_OK;
+}
+
+
+
+
+
 
 libResult GetSign(const ctx *ctx, const char *name, OQS_SIG **sig) {
 	if (!ctx->handle) {
@@ -353,4 +363,17 @@ func (l *Lib) SetRandomAlg(strAlg AlgType) (int, error) {
 	}
 
 	return 1, nil
+}
+
+func (l *Lib) GetRandomBytes(nbytes int) (randombytes []byte, err error) {
+	bytes := C.malloc(C.ulong(nbytes))
+	defer C.free(unsafe.Pointer(bytes))
+
+	res := C.GetRandomBytes((*C.char)(bytes), C.int(nbytes))
+
+	if res != C.ERR_OK {
+		return nil, libError(res, "failed to set bytes")
+	}
+
+	return C.GoBytes(bytes, C.int(nbytes)), nil
 }
