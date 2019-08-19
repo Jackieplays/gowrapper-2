@@ -21,7 +21,7 @@ typedef enum {
 typedef struct {
   void *handle;
 } ctx;
-char *errorString(libResult r) {
+  char *errorString(libResult r) {
 	switch (r) {
 	case ERR_CANNOT_LOAD_LIB:
 		return "cannot load library";
