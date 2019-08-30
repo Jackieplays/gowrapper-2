@@ -1,4 +1,4 @@
-package sigoliboqs
+package sigoqs
 
 //NOTE: THE COMMENTS BELOW ARE CODE WHICH GETS COMPILED (THEY ARE CALLED PREAMBLE).IT'S A UNIQUE/WEIRD FEATURE IN CGO.
 
@@ -21,7 +21,7 @@ typedef enum {
 typedef struct {
   void *handle;
 } ctx;
-  char *errorString(libResult r) {
+char *errorString(libResult r) {
 	switch (r) {
 	case ERR_CANNOT_LOAD_LIB:
 		return "cannot load library";
@@ -38,7 +38,7 @@ typedef struct {
 		return "unknown error";
 	}
 }
-libResult New(const char *path, ctx **c) {
+libResult NewOQS(const char *path, ctx **c) {
 	*c = malloc(sizeof(ctx));
 	if (!(*c)) {
 		return ERR_MEM;
@@ -111,7 +111,7 @@ libResult KeyPair(const OQS_SIG *sig, uint8_t *public_key, uint8_t *secret_key) 
 	}
 	return ERR_OK;
 }
-libResult Sign(const OQS_SIG *sig, uint8_t *signature, size_t *signature_len, const uint8_t *message, size_t message_len, const uint8_t *secret_key) {
+libResult SignOQS(const OQS_SIG *sig, uint8_t *signature, size_t *signature_len, const uint8_t *message, size_t message_len, const uint8_t *secret_key) {
 
 	OQS_STATUS status = OQS_SIG_sign(sig,signature, signature_len, message, message_len, secret_key);
 	if (status != OQS_SUCCESS) {
@@ -119,7 +119,7 @@ libResult Sign(const OQS_SIG *sig, uint8_t *signature, size_t *signature_len, co
 	}
 	return ERR_OK;
 }
-libResult Verify(const OQS_SIG *sig, const uint8_t *message, size_t message_len, const uint8_t *signature, size_t signature_len, const uint8_t *public_key) {
+libResult VerifyOQS(const OQS_SIG *sig, const uint8_t *message, size_t message_len, const uint8_t *signature, size_t signature_len, const uint8_t *public_key) {
 
 	OQS_STATUS status =OQS_SIG_verify(sig,message, message_len, signature, signature_len, public_key);
 	if (status != OQS_SUCCESS) {
@@ -184,8 +184,43 @@ type alg struct {
 	ctx *C.ctx
 }
 
+// PublicKey represents an OQS_SIG_DEFAULT public key.
+type PublicKey struct {
+	Public_Key []byte
+}
+type PrivateKey struct {
+	PublicKey
+	Private_Key []byte
+}
+
 //hello
 //fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+
+// func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure when to use []byte datatype ?
+// 	if s.sig == nil {
+// 		return nil, nil, errAlreadyClosed
+// 	}
+// 	start := time.Now()
+// 	//time.Sleep(time.Second * 5)
+// 	pubKeyLen := C.int(s.sig.length_public_key)
+// 	pk := C.malloc(C.ulong(pubKeyLen))
+// 	defer C.free(unsafe.Pointer(pk))
+
+// 	secretKeyLen := C.int(s.sig.length_secret_key)
+// 	sk := C.malloc(C.ulong(secretKeyLen))
+// 	defer C.free(unsafe.Pointer(sk))
+
+// 	res := C.KeyPair(s.sig, (*C.uchar)(pk), (*C.uchar)(sk))
+// 	if res != C.ERR_OK {
+// 		return nil, nil, libError(res, "key pair generation failed")
+// 	}
+
+// 	elapsed := time.Since(start)
+// 	fmt.Printf(" 1.a) key-pair gen time %s \n", elapsed)
+// 	//fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+// 	return C.GoBytes(pk, pubKeyLen), C.GoBytes(sk, secretKeyLen), nil
+
+// }
 
 func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure when to use []byte datatype ?
 	if s.sig == nil {
@@ -212,6 +247,37 @@ func (s *sig) KeyPair() (publicKey, secretKey []byte, err error) { //Not sure wh
 	return C.GoBytes(pk, pubKeyLen), C.GoBytes(sk, secretKeyLen), nil
 
 }
+
+// func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err error) {
+// 	if s.sig == nil {
+// 		return nil, errAlreadyClosed
+// 	}
+// 	//fmt.Println("AAAAAAAAAAAAAAAAAAAAAAa")
+// 	start := time.Now()
+// 	//	time.Sleep(time.Second * 2)
+
+// 	signlen := C.int(s.sig.length_signature)
+// 	signatureLen := C.malloc(C.ulong(1))
+// 	sig1 := C.malloc(C.ulong(s.sig.length_signature))
+// 	defer C.free(unsafe.Pointer(sig1))
+
+// 	mes_len := C.size_t(len(message)) //Should it be uint or int?, //Is len() fine?
+// 	msg := C.CBytes(message)
+// 	defer C.free(msg)
+// 	//fmt.Println("fdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+// 	sk := C.CBytes(secretKey)
+// 	defer C.free(sk)
+// 	//EXPECTED POTENTIAL BUGS IN THE LINE BELOW...Still struggling to resolve :(
+// 	res := C.Sign(s.sig, (*C.uchar)(sig1), (*C.ulong)(signatureLen), (*C.uchar)(msg), mes_len, (*C.uchar)(sk))
+// 	if res != C.ERR_OK {
+// 		return nil, libError(res, "signing failed")
+// 	}
+
+// 	elapsed := time.Since(start)
+// 	fmt.Printf("2. signing  time %s \n", elapsed)
+// 	return C.GoBytes(sig1, signlen), nil
+// }
+
 func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err error) {
 	if s.sig == nil {
 		return nil, errAlreadyClosed
@@ -232,7 +298,7 @@ func (s *sig) Sign(secretKey []byte, message []byte) (signature []byte, err erro
 	sk := C.CBytes(secretKey)
 	defer C.free(sk)
 	//EXPECTED POTENTIAL BUGS IN THE LINE BELOW...Still struggling to resolve :(
-	res := C.Sign(s.sig, (*C.uchar)(sig1), (*C.ulong)(signatureLen), (*C.uchar)(msg), mes_len, (*C.uchar)(sk))
+	res := C.SignOQS(s.sig, (*C.uchar)(sig1), (*C.ulong)(signatureLen), (*C.uchar)(msg), mes_len, (*C.uchar)(sk))
 	if res != C.ERR_OK {
 		return nil, libError(res, "signing failed")
 	}
@@ -260,7 +326,7 @@ func (s *sig) Verify(message []byte, signature []byte, publicKey []byte) (assert
 	pk := C.CBytes(publicKey)
 	//	defer C.free(pk)
 	//fmt.Println("D")
-	res := C.Verify(s.sig, (*C.uchar)(msg), mes_len, (*C.uchar)(sgn), sign_len, (*C.uchar)(pk))
+	res := C.VerifyOQS(s.sig, (*C.uchar)(msg), mes_len, (*C.uchar)(sgn), sign_len, (*C.uchar)(pk))
 	if res != C.ERR_OK {
 		//fmt.Println("E")
 		return false, libError(res, "verification failed")
@@ -323,7 +389,7 @@ func LoadLib(path string) (*Lib, error) {
 	defer C.free(unsafe.Pointer(p))
 
 	var ctx *C.ctx
-	res := C.New(p, &ctx)
+	res := C.NewOQS(p, &ctx)
 	if res != C.ERR_OK {
 		return nil, libError(res, "failed to load module at %q", path)
 	}
